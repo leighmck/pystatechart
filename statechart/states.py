@@ -31,6 +31,7 @@ class State:
     Attributes:
         name (str): State name used to identify this instance.
         context (Context): State's parent context.
+        verbose (bool): Activates state transition logging.
 
     Examples:
         * First create the parent context
@@ -54,8 +55,9 @@ class State:
             Only a state chart can have no parent context.
     """
 
-    def __init__(self, name, context):
+    def __init__(self, name, context, verbose=True):
         self._logger = logging.getLogger(self.__class__.__name__)
+        self.verbose = verbose
 
         self.name = name
 
@@ -135,7 +137,8 @@ class State:
             metadata (Metadata): Common statechart metadata.
             event (Event): Event which led to the transition into this state.
         """
-        self._logger.info('Activate "%s"', self.name)
+        if self.verbose:
+            self._logger.info('Activate "%s"', self.name)
 
         self.active = True
 
@@ -159,7 +162,8 @@ class State:
             metadata (Metadata): Common statechart metadata.
             event (Event): Event which led to the transition out of this state.
         """
-        self._logger.info('Deactivate "%s"', self.name)
+        if self.verbose:
+            self._logger.info('Deactivate "%s"', self.name)
 
         self.exit(event=event)
 
@@ -331,7 +335,8 @@ class ConcurrentState(State):
             metadata (Metadata): Common statechart metadata.
             event: Event which led to the transition out of this state.
         """
-        self._logger.info('Deactivate "%s"', self.name)
+        if self.verbose:
+            self._logger.info('Deactivate "%s"', self.name)
 
         for region in self.regions:
             if region.active:
@@ -542,7 +547,8 @@ class Statechart(Context):
         Raises:
             RuntimeError if the statechart had already been started.
         """
-        self._logger.info('Start "%s"', self.name)
+        if self.verbose:
+            self._logger.info('Start "%s"', self.name)
         self.active = True
         self.initial_state.activate(metadata=self.metadata, event=None)
 
@@ -550,7 +556,8 @@ class Statechart(Context):
         """
         Stops the statemachine by deactivating statechart and thus all it's child states.
         """
-        self._logger.info('Stop "%s"', self.name)
+        if self.verbose:
+            self._logger.info('Stop "%s"', self.name)
         self.deactivate(metadata=self.metadata, event=None)
 
     def deactivate(self, metadata, event):
@@ -561,7 +568,8 @@ class Statechart(Context):
             metadata (Metadata): Common statechart metadata.
             event (Event): Event which led to the transition out of this state.
         """
-        self._logger.info('Deactivate "%s"', self.name)
+        if self.verbose:
+            self._logger.info('Deactivate "%s"', self.name)
         self.active = False
         self.current_state = None
 
